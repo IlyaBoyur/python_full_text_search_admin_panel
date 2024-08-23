@@ -1,6 +1,19 @@
 -- Установка расширения для генерации UUID
 CREATE EXTENSION "uuid-ossp";
 -- Генерация данных в интервале с 1900 по 2021 год с шагом в 1 час. В итоге сгенерируется 1060681 записей
+CREATE SCHEMA IF NOT EXISTS content;
+CREATE TABLE IF NOT EXISTS content.film_work (
+    id uuid PRIMARY KEY,
+    title TEXT NOT NULL,
+    description TEXT,
+    creation_date DATE,
+    certificate TEXT,
+    file_path TEXT,
+    rating FLOAT,
+    type TEXT not null,
+    created_at timestamp with time zone,
+    updated_at timestamp with time zones
+);
 INSERT INTO content.film_work (id, title, type, creation_date, rating)
     SELECT uuid_generate_v4(), 'some name', 'movie', date::DATE, floor(random() * 100)
     FROM generate_series(
