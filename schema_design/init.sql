@@ -17,14 +17,14 @@ CREATE TABLE IF NOT EXISTS content.genre (
 CREATE TABLE IF NOT EXISTS content.film_work (
     id uuid PRIMARY KEY,
     title TEXT NOT NULL,
-    description TEXT,
+    description TEXT NOT NULL,
     creation_date DATE,
-    certificate TEXT,
-    file_path TEXT,
+    certificate TEXT NOT NULL,
+    file_path TEXT NOT NULL,
     rating FLOAT,
-    type TEXT not null,
+    type TEXT  NOT NULL,
     created_at timestamp with time zone,
-    updated_at timestamp with time zones
+    updated_at timestamp with time zone
 );
 -- Обобщение для актёра, режиссёра и сценариста
 CREATE TABLE IF NOT EXISTS content.person (
