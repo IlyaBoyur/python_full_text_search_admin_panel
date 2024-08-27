@@ -9,7 +9,16 @@ import psycopg2
 from psycopg2.extensions import connection as _connection, cursor as _cursor
 from psycopg2.extras import DictCursor, register_uuid
 
-import settings
+from settings import (
+    BULK_SIZE,
+    POSTGRES_DB,
+    POSTGRES_HOST,
+    POSTGRES_INIT,
+    POSTGRES_PASSWORD,
+    POSTGRES_PORT,
+    POSTGRES_USER,
+    SQLITE_DATABASE,
+)
 from schemas import (
     PersonPg,
     PersonSQLite,
@@ -277,20 +286,20 @@ def load_from_sqlite(
     sqlite_extractor = SQLiteExtractor(connection)
 
     postgres_loader.prepare()
-    for bulk in sqlite_extractor.bulk_generator(bulk_size=settings.BULK_SIZE):
+    for bulk in sqlite_extractor.bulk_generator(bulk_size=BULK_SIZE):
         postgres_loader.bulk_load(bulk)
 
 
 if __name__ == "__main__":
     dsl = {
-        "dbname": "movies",
-        "user": "postgres",
-        "password": "postgres",
-        "host": "127.0.0.1",
-        "port": 15432,
+        "dbname": POSTGRES_DB,
+        "user": POSTGRES_USER,
+        "password": POSTGRES_PASSWORD,
+        "host": POSTGRES_HOST,
+        "port": POSTGRES_PORT,
     }
     with contextlib.closing(
-        sqlite3.connect(settings.SQLITE_DB_NAME)
+        sqlite3.connect(SQLITE_DATABASE)
     ) as sqlite_connection, psycopg2.connect(
         **dsl, cursor_factory=DictCursor
     ) as pg_connection:
