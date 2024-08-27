@@ -260,24 +260,15 @@ class PostgresLoader:
             self._load_genre_film_work(cursor, genres_data)
 
             actors = itertools.chain.from_iterable(
-                (
-                    PersonFilmWorkPg(film_work_id=fw_id, person_id=id_, role="actor")
-                    for id_ in persons_ids
-                )
+                (PersonFilmWorkPg(fw_id, id_, "actor") for id_ in persons_ids)
                 for fw_id, persons_ids in data["film_actors"].items()
             )
             directors = itertools.chain.from_iterable(
-                (
-                    PersonFilmWorkPg(film_work_id=fw_id, person_id=id_, role="director")
-                    for id_ in persons_ids
-                )
+                (PersonFilmWorkPg(fw_id, id_, "director") for id_ in persons_ids)
                 for fw_id, persons_ids in data["film_directors"].items()
             )
             writers = itertools.chain.from_iterable(
-                (
-                    PersonFilmWorkPg(film_work_id=fw_id, person_id=id_, role="writer")
-                    for id_ in persons_ids
-                )
+                (PersonFilmWorkPg(fw_id, id_, "writer") for id_ in persons_ids)
                 for fw_id, persons_ids in data["film_writers"].items()
             )
             self._load_person_film_work(
