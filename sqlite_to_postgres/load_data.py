@@ -291,6 +291,20 @@ def load_from_sqlite(
 
 
 if __name__ == "__main__":
+    import subprocess
+
+    subprocess.Popen(
+        "psql -U {user} -h {host} -p {port} -d {name} -f {file}".format(
+            user=POSTGRES_USER,
+            host=POSTGRES_HOST,
+            port=POSTGRES_PORT,
+            name="postgres",
+            file=POSTGRES_INIT,
+        ),
+        env={"PGPASSWORD": POSTGRES_PASSWORD},
+        shell=True,
+    ).wait()
+
     dsl = {
         "dbname": POSTGRES_DB,
         "user": POSTGRES_USER,
