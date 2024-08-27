@@ -207,7 +207,8 @@ class PostgresLoader:
         cursor.execute(
             f"""
             INSERT INTO content.genre_film_work (id, film_work_id, genre_id)
-            VALUES {args};
+            VALUES {args}
+            ON CONFLICT DO NOTHING; 
             """
         )
 
@@ -223,7 +224,8 @@ class PostgresLoader:
         cursor.execute(
             f"""
             INSERT INTO content.person_film_work (id, film_work_id, person_id, role)
-            VALUES {args};
+            VALUES {args}
+            ON CONFLICT DO NOTHING; 
             """
         )
 
