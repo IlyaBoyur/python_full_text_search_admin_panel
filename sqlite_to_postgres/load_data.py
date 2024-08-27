@@ -135,6 +135,14 @@ class SQLiteToPgTransformer:
             for record in data
         )
 
+    @classmethod
+    def transform_genres(cls, data: Iterable[GenreSQLite]) -> Iterable[GenrePg]:
+        return (GenrePg(**asdict(record)) for record in data)
+
+    @classmethod
+    def transform_persons(cls, data: Iterable[PersonSQLite]) -> Iterable[PersonPg]:
+        return (PersonPg(**asdict(record)) for record in data)
+
 
 class PostgresLoader:
     def __init__(self, connection: _connection) -> None:
@@ -234,15 +242,12 @@ class PostgresLoader:
             films = SQLiteToPgTransformer.transform_films(data["films"])
             self._load_film_work(cursor, films)
 
-            genres = itertools.chain.from_iterable(
-                (GenrePg(**asdict(record)) for record in genre_list)
-                for genre_list in data["genres"].values()
+            genres = SQLiteToPgTransformer.transform_genres(
+                itertools.chain.from_iterable(data["genres"].values())
             )
             self._load_genre(cursor, genres)
 
-            persons = (
-                PersonPg(**asdict(record)) for record in data["persons"].values()
-            )
+            persons = SQLiteToPgTransformer.transform_persons(data["persons"].values())
             self._load_person(cursor, persons)
 
             genres_data = itertools.chain.from_iterable(
