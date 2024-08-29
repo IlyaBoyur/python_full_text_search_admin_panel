@@ -15,3 +15,5 @@ POSTGRES_PORT = int(os.environ.get("POSTGRES_PORT", 5432))
 POSTGRES_INIT = os.environ.get("POSTGRES_INIT", "")
 
 BULK_SIZE = int(os.environ.get("BULK_SIZE", 1))
+
+TIMEZONE = os.environ.get("TIMEZONE", "Europe/Moscow")
