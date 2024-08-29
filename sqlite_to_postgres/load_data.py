@@ -30,6 +30,7 @@ from schemas import (
     PersonFilmWorkPg,
     PYTHON_2_PG_TYPE_MAPPING,
 )
+from utils import current_datetime
 
 
 logger = logging.getLogger(__name__)
@@ -183,25 +184,27 @@ class PostgresLoader:
     def _load_genre(self, cursor: _cursor, genres: Iterable[GenrePg]) -> None:
         data = (astuple(item) for item in genres)
         data = list(set(data))
-        args = ", ".join(cursor.mogrify("(%s, %s)", item).decode() for item in data)
+        now = current_datetime().isoformat(sep=' ')
+        args = ", ".join(cursor.mogrify("(%s, %s, %s, %s)", (*item,now,now)).decode() for item in data)
 
         cursor.execute(
             f"""
-            INSERT INTO content.genre (id, name)
+            INSERT INTO content.genre (id, name, updated_at, created_at)
             VALUES {args}
-            ON CONFLICT (id) DO UPDATE SET name=EXCLUDED.name;
+            ON CONFLICT (id) DO UPDATE SET name=EXCLUDED.name, updated_at='{now}';
             """
         )
 
     def _load_person(self, cursor: _cursor, persons: Iterable[PersonPg]) -> None:
         persons = (astuple(item) for item in persons)
-        args = ", ".join(cursor.mogrify("(%s, %s)", item).decode() for item in persons)
+        now = current_datetime().isoformat(sep=' ')
+        args = ", ".join(cursor.mogrify("(%s, %s, %s, %s)", (*item,now,now)).decode() for item in persons)
 
         cursor.execute(
             f"""
-            INSERT INTO content.person (id, full_name)
+            INSERT INTO content.person (id, full_name, updated_at, created_at)
             VALUES {args}
-            ON CONFLICT (id) DO UPDATE SET full_name=EXCLUDED.full_name;
+            ON CONFLICT (id) DO UPDATE SET full_name=EXCLUDED.full_name, updated_at='{now}';
             """
         )
 
@@ -210,11 +213,13 @@ class PostgresLoader:
     ) -> None:
         data = (astuple(item) for item in data)
         data = ((id_, genre_id, fw_id) for fw_id, genre_id, id_ in data)
-        args = ", ".join(cursor.mogrify("(%s, %s, %s)", item).decode() for item in data)
+        now = current_datetime().isoformat(sep=' ')
+
+        args = ", ".join(cursor.mogrify("(%s, %s, %s, %s)", (*item,now)).decode() for item in data)
 
         cursor.execute(
             f"""
-            INSERT INTO content.genre_film_work (id, film_work_id, genre_id)
+            INSERT INTO content.genre_film_work (id, film_work_id, genre_id, created_at)
             VALUES {args}
             ON CONFLICT DO NOTHING; 
             """
@@ -225,13 +230,15 @@ class PostgresLoader:
     ) -> None:
         data = (astuple(item) for item in data)
         data = ((id_, fw_id, p_id, role) for fw_id, p_id, role, id_ in data)
+        now = current_datetime().isoformat(sep=' ')
+
         args = ", ".join(
-            cursor.mogrify("(%s, %s, %s, %s)", item).decode() for item in data
+            cursor.mogrify("(%s, %s, %s, %s, %s)", (*item,now)).decode() for item in data
         )
 
         cursor.execute(
             f"""
-            INSERT INTO content.person_film_work (id, film_work_id, person_id, role)
+            INSERT INTO content.person_film_work (id, film_work_id, person_id, role, created_at)
             VALUES {args}
             ON CONFLICT DO NOTHING; 
             """
