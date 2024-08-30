@@ -184,8 +184,11 @@ class PostgresLoader:
     def _load_genre(self, cursor: _cursor, genres: Iterable[GenrePg]) -> None:
         data = (astuple(item) for item in genres)
         data = list(set(data))
-        now = current_datetime().isoformat(sep=' ')
-        args = ", ".join(cursor.mogrify("(%s, %s, %s, %s)", (*item,now,now)).decode() for item in data)
+        now = current_datetime().isoformat(sep=" ")
+        args = ", ".join(
+            cursor.mogrify("(%s, %s, %s, %s)", (*item, now, now)).decode()
+            for item in data
+        )
 
         cursor.execute(
             f"""
@@ -197,8 +200,11 @@ class PostgresLoader:
 
     def _load_person(self, cursor: _cursor, persons: Iterable[PersonPg]) -> None:
         persons = (astuple(item) for item in persons)
-        now = current_datetime().isoformat(sep=' ')
-        args = ", ".join(cursor.mogrify("(%s, %s, %s, %s)", (*item,now,now)).decode() for item in persons)
+        now = current_datetime().isoformat(sep=" ")
+        args = ", ".join(
+            cursor.mogrify("(%s, %s, %s, %s)", (*item, now, now)).decode()
+            for item in persons
+        )
 
         cursor.execute(
             f"""
@@ -213,9 +219,11 @@ class PostgresLoader:
     ) -> None:
         data = (astuple(item) for item in data)
         data = ((id_, genre_id, fw_id) for fw_id, genre_id, id_ in data)
-        now = current_datetime().isoformat(sep=' ')
+        now = current_datetime().isoformat(sep=" ")
 
-        args = ", ".join(cursor.mogrify("(%s, %s, %s, %s)", (*item,now)).decode() for item in data)
+        args = ", ".join(
+            cursor.mogrify("(%s, %s, %s, %s)", (*item, now)).decode() for item in data
+        )
 
         cursor.execute(
             f"""
@@ -230,10 +238,11 @@ class PostgresLoader:
     ) -> None:
         data = (astuple(item) for item in data)
         data = ((id_, fw_id, p_id, role) for fw_id, p_id, role, id_ in data)
-        now = current_datetime().isoformat(sep=' ')
+        now = current_datetime().isoformat(sep=" ")
 
         args = ", ".join(
-            cursor.mogrify("(%s, %s, %s, %s, %s)", (*item,now)).decode() for item in data
+            cursor.mogrify("(%s, %s, %s, %s, %s)", (*item, now)).decode()
+            for item in data
         )
 
         cursor.execute(
