@@ -295,7 +295,7 @@ class PostgresLoader:
 def load_from_sqlite(
     connection: sqlite3.Connection, pg_connection: _connection
 ) -> None:
-    """Основной метод загрузки данных из SQLite в Postgres"""
+    """Основной метод загрузки данных из SQLite в PostgreSQL."""
     postgres_loader = PostgresLoader(pg_connection)
     sqlite_extractor = SQLiteExtractor(connection)
 
@@ -307,17 +307,18 @@ def load_from_sqlite(
 if __name__ == "__main__":
     import subprocess
 
-    subprocess.Popen(
-        "psql -U {user} -h {host} -p {port} -d {name} -f {file}".format(
-            user=POSTGRES_USER,
-            host=POSTGRES_HOST,
-            port=POSTGRES_PORT,
-            name="postgres",
-            file=POSTGRES_INIT,
-        ),
-        env={"PGPASSWORD": POSTGRES_PASSWORD},
-        shell=True,
-    ).wait()
+    if POSTGRES_INIT:
+        subprocess.Popen(
+            "psql -U {user} -h {host} -p {port} -d {name} -f {file}".format(
+                user=POSTGRES_USER,
+                host=POSTGRES_HOST,
+                port=POSTGRES_PORT,
+                name="postgres",
+                file=POSTGRES_INIT,
+            ),
+            env={"PGPASSWORD": POSTGRES_PASSWORD},
+            shell=True,
+        ).wait()
 
     dsl = {
         "dbname": POSTGRES_DB,
