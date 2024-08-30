@@ -42,7 +42,8 @@ CREATE TABLE IF NOT EXISTS content.genre_film_work (
     created_at timestamp with time zone
 );
 -- Обязательно проверяется уникальность жанра и кинопроизведения, чтобы не появлялось дублей
-CREATE UNIQUE INDEX IF NOT EXISTS film_work_genre ON content.genre_film_work(film_work_id, genre_id);
+CREATE UNIQUE INDEX IF NOT EXISTS film_work_genre
+ON content.genre_film_work(film_work_id, genre_id);
 -- m2m-таблица для связывания кинопроизведений с участниками
 CREATE TABLE IF NOT EXISTS content.person_film_work (
     id uuid PRIMARY KEY,
@@ -53,4 +54,5 @@ CREATE TABLE IF NOT EXISTS content.person_film_work (
 );
 -- Обязательно проверяется уникальность кинопроизведения, человека и роли человека, чтобы не появлялось дублей
 -- Один человек может быть сразу в нескольких ролях (например, сценарист и режиссёр)
-CREATE UNIQUE INDEX IF NOT EXISTS film_work_person_role ON content.person_film_work (film_work_id, person_id, role);
+CREATE UNIQUE INDEX IF NOT EXISTS film_work_person_role
+ON content.person_film_work (film_work_id, person_id, role);
