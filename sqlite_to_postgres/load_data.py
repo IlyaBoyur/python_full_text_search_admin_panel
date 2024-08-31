@@ -2,7 +2,7 @@ import contextlib
 import itertools
 import logging
 from dataclasses import asdict, astuple, fields
-from typing import Iterable
+from typing import Iterable, Generator, Any
 
 import sqlite3
 import psycopg2
@@ -156,13 +156,19 @@ class PostgresLoader:
 
     def _prepare_film_work_query(self, cursor: _cursor) -> None:
         fw_fields = [f.name for f in fields(FilmWorkPg)]
-        fw_poses = ", ".join(f"${pose}" for pose, _ in enumerate(fw_fields, 1))
+        fw_poses = (
+            f"NULLIF(${pose},'')" if f in ("type",) else f"${pose}"
+            for pose, f in enumerate(fw_fields, 1)
+        )
+        fw_poses = ", ".join(fw_poses)
         fw_updates = ", ".join(
-            field + "=EXCLUDED." + field for field in fw_fields if field != "id"
+            field + "=EXCLUDED." + field
+            for field in fw_fields
+            if field not in ["id", "created_at"]
         )
         fw_fields = ", ".join(fw_fields)
         fw_field_types = ", ".join(
-            PYTHON_2_PG_TYPE_MAPPING.get(f.type, None) for f in fields(FilmWorkPg)
+            PYTHON_2_PG_TYPE_MAPPING.get(f.type, "unknown") for f in fields(FilmWorkPg)
         )
         query = f"""
             PREPARE film_work_insert ({fw_field_types}) AS
@@ -183,29 +189,31 @@ class PostgresLoader:
 
     def _load_genre(self, cursor: _cursor, genres: Iterable[GenrePg]) -> None:
         data = (astuple(item) for item in genres)
-        data = list(set(data))
         now = current_datetime().isoformat(sep=" ")
+        data = ((*item, now, now) for item in set(data))
+
         args = ", ".join(
-            cursor.mogrify("(%s, %s, %s, %s)", (*item, now, now)).decode()
-            for item in data
+            cursor.mogrify("(%s, %s, %s, %s, %s)", item).decode() for item in data
         )
 
         cursor.execute(
             f"""
-            INSERT INTO content.genre (id, name, updated_at, created_at)
+            INSERT INTO content.genre (id, name, description, updated_at, created_at)
             VALUES {args}
-            ON CONFLICT (id) DO UPDATE SET name=EXCLUDED.name, updated_at='{now}';
+            ON CONFLICT (id) DO UPDATE SET 
+                name=EXCLUDED.name,
+                description=EXCLUDED.description,
+                updated_at='{now}';
             """
         )
 
     def _load_person(self, cursor: _cursor, persons: Iterable[PersonPg]) -> None:
-        persons = (astuple(item) for item in persons)
         now = current_datetime().isoformat(sep=" ")
-        args = ", ".join(
-            cursor.mogrify("(%s, %s, %s, %s)", (*item, now, now)).decode()
-            for item in persons
-        )
+        persons = ((*astuple(item), now, now) for item in persons)
 
+        args = ", ".join(
+            cursor.mogrify("(%s, %s, %s, %s)", item).decode() for item in persons
+        )
         cursor.execute(
             f"""
             INSERT INTO content.person (id, full_name, updated_at, created_at)
@@ -218,13 +226,12 @@ class PostgresLoader:
         self, cursor: _cursor, data: Iterable[GenreFilmWorkPg]
     ) -> None:
         data = (astuple(item) for item in data)
-        data = ((id_, genre_id, fw_id) for fw_id, genre_id, id_ in data)
         now = current_datetime().isoformat(sep=" ")
+        data = ((id_, fw_id, genre_id, now) for fw_id, genre_id, id_ in data)
 
         args = ", ".join(
-            cursor.mogrify("(%s, %s, %s, %s)", (*item, now)).decode() for item in data
+            cursor.mogrify("(%s, %s, %s, %s)", item).decode() for item in data
         )
-
         cursor.execute(
             f"""
             INSERT INTO content.genre_film_work (id, film_work_id, genre_id, created_at)
@@ -237,14 +244,12 @@ class PostgresLoader:
         self, cursor: _cursor, data: Iterable[PersonFilmWorkPg]
     ) -> None:
         data = (astuple(item) for item in data)
-        data = ((id_, fw_id, p_id, role) for fw_id, p_id, role, id_ in data)
         now = current_datetime().isoformat(sep=" ")
+        data = ((id_, fw_id, p_id, role, now) for fw_id, p_id, role, id_ in data)
 
         args = ", ".join(
-            cursor.mogrify("(%s, %s, %s, %s, %s)", (*item, now)).decode()
-            for item in data
+            cursor.mogrify("(%s, %s, %s, %s, %s)", item).decode() for item in data
         )
-
         cursor.execute(
             f"""
             INSERT INTO content.person_film_work (id, film_work_id, person_id, role, created_at)
