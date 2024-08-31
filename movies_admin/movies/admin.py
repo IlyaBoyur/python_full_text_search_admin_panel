@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.utils.translation import gettext_lazy as _
 
-from .models import Filmwork, FilmworkType, Genre, Person, PersonFimwork
+from .models import Filmwork, FilmworkType, Genre, GenreFilmwork, Person, PersonFimwork
 
 
 @admin.register(Genre)
@@ -13,6 +13,10 @@ class GenreAdmin(admin.ModelAdmin):
 class PersonAdmin(admin.ModelAdmin):
     list_display = ("full_name", "created_at", "updated_at")
 
+
+class GenreFilmworkInline(admin.TabularInline):
+    model = GenreFilmwork
+    extra = 0
 
 class PersonFimworkInline(admin.TabularInline):
     model = PersonFimwork
@@ -38,7 +42,7 @@ class FilmworkAdmin(admin.ModelAdmin):
     list_filter = ("type", "creation_date")
     search_fields = ("title", "description", "id")
 
-    inlines = [PersonFimworkInline]
+    inlines = [GenreFilmworkInline, PersonFimworkInline]
 
     @admin.action(description=_("Жанры"))
     def get_genres(self, obj: Filmwork) -> str:
