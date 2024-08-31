@@ -103,7 +103,7 @@ class SQLiteExtractor:
     def bulk_generator(self, bulk_size: int | None = None):
         with contextlib.closing(self.connection.cursor()) as cursor:
             film_cursor = cursor.execute(
-                "SELECT id, title, description, rating FROM film_work;"
+                "SELECT id, title, description, rating, type FROM film_work;"
             )
             while True:
                 bulk = film_cursor.fetchmany(size=bulk_size or cursor.arraysize)
@@ -131,7 +131,7 @@ class SQLiteToPgTransformer:
                 certificate="",
                 file_path="",
                 rating=record.rating or 0.0,
-                type="",
+                type=record.type,
             )
             for record in data
         )

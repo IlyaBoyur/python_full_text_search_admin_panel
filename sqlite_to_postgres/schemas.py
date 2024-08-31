@@ -18,6 +18,7 @@ class FilmWorkSQLite:
     title: str
     description: str
     rating: float
+    type: str = ""
 
 
 @dataclass
