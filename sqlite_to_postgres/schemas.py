@@ -3,6 +3,7 @@ from dataclasses import dataclass, field
 from datetime import datetime
 
 from types import MappingProxyType
+from utils import current_datetime
 
 
 @dataclass
@@ -34,13 +35,16 @@ class FilmWorkPg:
     certificate: str = ""
     file_path: str = ""
     rating: float = 0.0
-    type: str = ""
+    type: str | None = None
+    created_at: datetime = field(default_factory=current_datetime)
+    updated_at: datetime = field(default_factory=current_datetime)
 
 
 @dataclass
 class GenrePg:
     id: uuid.UUID
     name: str
+    description: str = ""
 
 
 @dataclass
@@ -71,5 +75,6 @@ PYTHON_2_PG_TYPE_MAPPING = MappingProxyType(
         uuid.UUID: "uuid",
         float: "float",
         datetime: "timestamp",
+        None: "null",
     }
 )
