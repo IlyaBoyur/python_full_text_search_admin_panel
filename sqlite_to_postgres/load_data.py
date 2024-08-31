@@ -2,7 +2,7 @@ import contextlib
 import itertools
 import logging
 from dataclasses import asdict, astuple, fields
-from typing import Iterable, Generator, Any
+from typing import Iterable
 
 import sqlite3
 import psycopg2
