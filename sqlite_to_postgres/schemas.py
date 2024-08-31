@@ -6,13 +6,14 @@ from types import MappingProxyType
 from utils import current_datetime
 
 
-@dataclass
+@dataclass(frozen=True)
 class GenreSQLite:
+    __slots__ = ("id", "name")
     id: str
     name: str
 
 
-@dataclass
+@dataclass(frozen=True)
 class FilmWorkSQLite:
     id: str
     title: str
@@ -21,13 +22,14 @@ class FilmWorkSQLite:
     type: str = ""
 
 
-@dataclass
+@dataclass(frozen=True)
 class PersonSQLite:
+    __slots__ = ("id", "full_name")
     id: str
     full_name: str
 
 
-@dataclass
+@dataclass(frozen=True)
 class FilmWorkPg:
     id: uuid.UUID
     title: str = ""
@@ -41,27 +43,28 @@ class FilmWorkPg:
     updated_at: datetime = field(default_factory=current_datetime)
 
 
-@dataclass
+@dataclass(frozen=True)
 class GenrePg:
     id: uuid.UUID
     name: str
     description: str = ""
 
 
-@dataclass
+@dataclass(frozen=True)
 class GenreFilmWorkPg:
     film_work_id: uuid.UUID
     genre_id: uuid.UUID
     id: uuid.UUID = field(default_factory=uuid.uuid4)
 
 
-@dataclass
+@dataclass(frozen=True)
 class PersonPg:
+    __slots__ = ("id", "full_name")
     id: uuid.UUID
     full_name: str
 
 
-@dataclass
+@dataclass(frozen=True)
 class PersonFilmWorkPg:
     film_work_id: uuid.UUID
     person_id: uuid.UUID
