@@ -18,6 +18,7 @@ class GenreFilmworkInline(admin.TabularInline):
     model = GenreFilmwork
     extra = 0
 
+
 class PersonFimworkInline(admin.TabularInline):
     model = PersonFimwork
     extra = 0
