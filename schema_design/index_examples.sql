@@ -23,18 +23,18 @@ INSERT INTO content.film_work (id, title, type, creation_date, rating)
     ) date;
 -- Добавление B-tree индекса для ускорения поиска по полю типа date
 CREATE INDEX film_work_creation_date_idx ON content.film_work(creation_date);
--- Проверка работы индекса: запрос для получения конкретной записи
+-- Проверка работы индекса: запрос для получения конкретной записи - значительно быстрее
 EXPLAIN ANALYZE SELECT * FROM content.film_work WHERE
 creation_date = '2020-04-01';
--- Проверка работы индекса: запрос по диапазону записей
+-- Проверка работы индекса: запрос по диапазону записей - значительно быстрее
 EXPLAIN ANALYZE SELECT * FROM content.film_work WHERE
 creation_date BETWEEN '2020-04-01' AND '2020-09-01';
--- Тест-сравнение размеров таблицы и её индексов
+-- Тест-сравнение размеров таблицы и её индексов - индексы занимают много места!
 \dt+ content.film_work
 \di+ content.film_work_creation_date_idx
 \di+ content.film_work_pkey
 -- Тест-сравнение времени вставки в таблицу с индексом и без него
-\copy (select * from content.film_work) to '/output.csv' with csv;
+\copy (SELECT * FROM content.film_work) TO '/output.csv' WITH CSV;
 TRUNCATE content.film_work;
 DROP INDEX content.film_work_creation_date_idx;
 \timing on
@@ -50,9 +50,8 @@ CREATE TABLE IF NOT EXISTS content.genre_film_work (
 );
 CREATE INDEX genres_idx ON content.genre_film_work(genre);
 -- Индекс не используется - высокая селективность (мало уникальных значений, много выдаваемых строк)
-EXPLAIN ANALYSE SELECT * FROM
-content.genre_film_work WHERE genre = 'comedy' LIMIT
-200;
+EXPLAIN ANALYSE SELECT * FROM content.genre_film_work
+WHERE genre = 'comedy' LIMIT 200;
 -- Композитный индекс - из нескольких полей - нельзя добавить одного актера к одному и тому же фильму дважды
 CREATE TABLE IF NOT EXISTS content.person (
     id uuid PRIMARY KEY
